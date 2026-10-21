@@ -1,0 +1,164 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+
+const faqs: { q: string; a: string }[] = [
+  {
+    q: `Wann erscheint ${site.name}?`,
+    a: `${site.name} kommt in den App Store. Einen Termin gibt es noch nicht; sobald die App verfügbar ist, steht der Link auf der Startseite.`,
+  },
+  {
+    q: 'Brauche ich ein Konto?',
+    a: `Nein. ${site.name} funktioniert ohne Anmeldung. Deine Reisen werden auf deinem Gerät gespeichert.`,
+  },
+  {
+    q: 'Funktioniert die App auch offline?',
+    a: 'Ja. Die Weltkarte und die Flughafen-Datenbank mit rund 7.900 Flughäfen sind in der App enthalten. Du kannst Flüge also auch im Flugmodus eintragen.',
+  },
+  {
+    q: 'Wie werden Distanz und Flugzeit berechnet?',
+    a: 'Die Distanz ist die Großkreis-Entfernung zwischen den beiden Flughäfen, also der kürzeste Weg über die Erdoberfläche. Die Flugzeit ergibt sich aus Abflug- und Ankunftszeit in der jeweiligen Ortszeit, Zeitzonen werden dabei berücksichtigt.',
+  },
+  {
+    q: 'Was zählt als Land?',
+    a: 'Die 193 Mitgliedstaaten der Vereinten Nationen, die Beobachterstaaten Vatikanstadt und Palästina sowie Kosovo und Taiwan, insgesamt 197. Abhängige Gebiete zählen zu ihrem Staat: Grönland zählt also als Dänemark. Auf der Karte wird trotzdem das Gebiet eingefärbt, in dem du tatsächlich warst.',
+  },
+  {
+    q: 'Kann ich Länder eintragen, die ich nicht mit dem Flugzeug erreicht habe?',
+    a: 'Ja. Zu einer Reise kannst du Länder hinzufügen, die du über Land besucht hast, etwa einen Tagesausflug von Barcelona nach Andorra. Sie zählen in den Statistiken, auf der Karte und bei den Erfolgen wie geflogene Länder.',
+  },
+  {
+    q: 'Kann ich Meilen statt Kilometer anzeigen?',
+    a: 'Ja, in den Einstellungen. Dort legst du auch deinen Heimatflughafen fest; solange du keinen wählst, leitet die App ihn aus deinen Reisen ab.',
+  },
+];
+---
+
+<Base title="Support" description={`Hilfe und Kontakt zu ${site.name}, dazu Antworten auf häufige Fragen.`}>
+  <div class="container support">
+    <h1>Support</h1>
+    <p class="lead">Fragen, Fehler oder Ideen zu {site.name}? Melde dich gern. Antworten auf häufige Fragen stehen weiter unten.</p>
+
+    <section class="card contact" aria-labelledby="contact-title">
+      <h2 id="contact-title" class="label">Kontakt</h2>
+      {
+        site.supportEmail ? (
+          <p class="contact-mail">
+            <a href={`mailto:${site.supportEmail}`}>{site.supportEmail}</a>
+          </p>
+        ) : (
+          <p class="todo">
+            <strong>TODO:</strong> Support-Adresse in <code>src/config.ts</code> eintragen.
+          </p>
+        )
+      }
+      <p class="contact-hint">
+        Bei Fehlern hilft es, wenn du kurz dazuschreibst, welches Gerät und welche App-Version du nutzt.
+      </p>
+    </section>
+
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Häufige Fragen</h2>
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </section>
+  </div>
+</Base>
+
+<style>
+  .support {
+    padding-top: var(--space-12);
+  }
+
+  .contact {
+    max-width: var(--text-width);
+    margin-block: var(--space-8) var(--space-16);
+    padding: var(--space-6);
+  }
+
+  .contact h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  .contact-mail {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .todo {
+    padding: var(--space-3) var(--space-4);
+    border: 1.5px dashed var(--stamp-edge);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+  }
+
+  .todo strong {
+    color: var(--primary);
+  }
+
+  .contact-hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .faq {
+    max-width: var(--text-width);
+  }
+
+  details {
+    border-bottom: 1px solid var(--border);
+  }
+
+  details:first-of-type {
+    border-top: 1px solid var(--border);
+  }
+
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--transition);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '+';
+    flex: none;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1;
+    color: var(--primary);
+  }
+
+  details[open] summary::after {
+    content: '–';
+  }
+
+  summary:hover {
+    color: var(--primary);
+  }
+
+  details p {
+    margin: 0;
+    padding-bottom: var(--space-4);
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import BoardingPass from '../components/BoardingPass.astro';
+---
+
+<Base title="Seite nicht gefunden" description="Diese Seite gibt es nicht." noindex>
+  <div class="container not-found">
+    <div class="text">
+      <p class="label">Fehler 404</p>
+      <h1>Dieses Ziel steht auf keiner Karte.</h1>
+      <p class="lead">Die Seite gibt es nicht oder nicht mehr. Vielleicht hat sich ein Tippfehler in die Adresse geschlichen.</p>
+      <p><a class="button button-primary" href="/">Zur Startseite</a></p>
+    </div>
+    <BoardingPass
+      from={{ code: '404', city: 'Diese Seite' }}
+      to={{ code: '???', city: 'Unbekannt' }}
+      date="Heute"
+      note="Gestrichen"
+      fields={[
+        { label: 'Abflug', value: '–' },
+        { label: 'Ankunft', value: '–' },
+        { label: 'Distanz', value: '0 km' },
+      ]}
+    />
+  </div>
+</Base>
+
+<style>
+  .not-found {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    gap: var(--space-12);
+    align-items: center;
+    padding-top: var(--space-16);
+  }
+
+  .text .label {
+    margin-bottom: var(--space-2);
+  }
+
+  @media (max-width: 52rem) {
+    .not-found {
+      grid-template-columns: minmax(0, 1fr);
+      padding-top: var(--space-8);
+    }
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+/** Gemeinsames Layout für längere Textseiten in Markdown (Rechtstexte). */
+import Base from './Base.astro';
+
+interface Props {
+  frontmatter: { title: string; description: string; updated?: string };
+}
+
+const { title, description, updated } = Astro.props.frontmatter;
+---
+
+<Base title={title} description={description}>
+  <article class="container prose">
+    <h1>{title}</h1>
+    {updated && <p class="updated">Stand: {updated}</p>}
+    <slot />
+  </article>
+</Base>
+
+<style>
+  .prose {
+    padding-top: var(--space-12);
+  }
+
+  .prose > :global(*) {
+    max-width: var(--text-width);
+  }
+
+  .prose h1 {
+    font-size: clamp(2rem, 1.6rem + 2vw, 3rem);
+  }
+
+  .updated {
+    color: var(--text-subtle);
+    font-size: 0.9375rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: var(--space-12);
+    font-size: 1.5rem;
+  }
+
+  .prose :global(h3) {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-2);
+  }
+
+  .prose :global(li + li) {
+    margin-top: var(--space-1);
+  }
+
+  /* Platzhalter für noch fehlende Rechtstexte: eine gestrichelte Lücke, wie das leere Feld einer Länder-Briefmarke. */
+  .prose :global(blockquote) {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1.5px dashed var(--stamp-edge);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  .prose :global(blockquote strong) {
+    color: var(--primary);
+  }
+</style>
