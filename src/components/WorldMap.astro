@@ -1,0 +1,204 @@
+---
+/**
+ * Die Weltkarte der App als statisches SVG: Natural-Earth-Länder in Web Mercator, besuchte Länder getönt,
+ * Flüge als Großkreis-Bögen, Flughäfen als Punkte mit IATA-Code. Wird komplett beim Build gerechnet.
+ * Auf schmalen Bildschirmen schneidet `slice` die Ränder ab, damit Punkte und Labels lesbar bleiben.
+ */
+import worldJson from '../data/world.json';
+import { airports, flights, type Iata } from '../data/sample';
+import { greatCirclePoints, project, type Point } from '../lib/geo';
+
+interface Props {
+  /** Ausschnitt in Grad: westlich, östlich, nördlich, südlich. */
+  bounds?: { west: number; east: number; north: number; south: number };
+  label: string;
+}
+
+const { bounds = { west: -88, east: 112, north: 68, south: 5 }, label } = Astro.props;
+
+// Ausgabe in einem Koordinatenraum von 1000 Einheiten Breite, damit Strichstärken und Schrift in "px" denkbar sind.
+const OUT_WIDTH = 1000;
+const nw = project(bounds.west, bounds.north);
+const se = project(bounds.east, bounds.south);
+const k = OUT_WIDTH / (se.x - nw.x);
+const height = Math.round((se.y - nw.y) * k);
+const toOut = (p: Point): Point => ({ x: (p.x - nw.x) * k, y: (p.y - nw.y) * k });
+const fmt = (n: number) => Math.round(n * 10) / 10;
+
+interface CountryFeature {
+  iso: string;
+  name: string;
+  rings: [number, number][][];
+}
+
+const visited = new Set(flights.flatMap((f) => [airports[f.from].country, airports[f.to].country]));
+
+// Nur Länder zeichnen, die in den Ausschnitt ragen.
+const margin = 40;
+const countries = (worldJson as CountryFeature[]).flatMap((c) => {
+  let d = '';
+  let inView = false;
+  for (const ring of c.rings) {
+    ring.forEach(([lon, lat], i) => {
+      const p = toOut(project(lon, lat));
+      if (p.x > -margin && p.x < OUT_WIDTH + margin && p.y > -margin && p.y < height + margin) inView = true;
+      d += `${i === 0 ? 'M' : 'L'}${fmt(p.x)} ${fmt(p.y)}`;
+    });
+    d += 'Z';
+  }
+  return inView ? [{ iso: c.iso, d, visited: visited.has(c.iso) }] : [];
+});
+
+const routes = flights.map((f) => {
+  const a = airports[f.from];
+  const b = airports[f.to];
+  const d = greatCirclePoints(a.lat, a.lon, b.lat, b.lon)
+    .map(([lon, lat], i) => {
+      const p = toOut(project(lon, lat));
+      return `${i === 0 ? 'M' : 'L'}${fmt(p.x)} ${fmt(p.y)}`;
+    })
+    .join('');
+  return { d, highlight: f.highlight ?? false };
+});
+
+// Wo das Label neben dem Punkt sitzt, damit sich nahe Flughäfen nicht überdecken.
+const labelSide: Partial<Record<Iata, 'above' | 'below'>> = { FRA: 'below' };
+const usedAirports = [...new Set(flights.flatMap((f) => [f.from, f.to]))];
+const markers = usedAirports.map((iata) => {
+  const a = airports[iata];
+  return { iata, city: a.city, point: toOut(project(a.lon, a.lat)), side: labelSide[iata] ?? 'above' };
+});
+---
+
+<figure class="map card">
+  <svg
+    viewBox={`0 0 ${OUT_WIDTH} ${height}`}
+    preserveAspectRatio="xMidYMid slice"
+    style={`--ratio: ${OUT_WIDTH} / ${height}`}
+    role="img"
+    aria-labelledby="map-title"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <title id="map-title">{label}</title>
+    <rect class="ocean" width={OUT_WIDTH} height={height} />
+    <g class="land">
+      {countries.map((c) => <path d={c.d} class={c.visited ? 'visited' : undefined} />)}
+    </g>
+    <g class="routes">
+      {routes.map((r) => <path d={r.d} class={r.highlight ? 'route draw' : 'route'} pathLength={r.highlight ? 1 : undefined} />)}
+    </g>
+    <g class="airports">
+      {
+        markers.map((m) => (
+          <g transform={`translate(${fmt(m.point.x)} ${fmt(m.point.y)})`}>
+            <circle r="4.5" />
+            <text y={m.side === 'above' ? -10 : 20}>{m.iata}</text>
+          </g>
+        ))
+      }
+    </g>
+  </svg>
+  <slot />
+</figure>
+
+<style>
+  .map {
+    margin: 0;
+    overflow: hidden;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--ratio);
+  }
+
+  .ocean {
+    fill: var(--map-ocean);
+  }
+
+  .land path {
+    fill: var(--map-land);
+    fill-rule: evenodd;
+    stroke: var(--map-border);
+    stroke-width: 0.8;
+    stroke-linejoin: round;
+  }
+
+  .land path.visited {
+    fill: var(--map-land-visited);
+    stroke: var(--map-border-visited);
+  }
+
+  .route {
+    fill: none;
+    stroke: var(--map-route);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Der eine bewusste Moment: die hervorgehobene Route zeichnet sich als Bogen. */
+  .route.draw {
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 1.8s cubic-bezier(0.45, 0, 0.2, 1) 0.4s forwards;
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route.draw {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .airports circle {
+    fill: var(--map-route);
+    stroke: var(--surface);
+    stroke-width: 2;
+  }
+
+  .airports text {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-anchor: middle;
+    fill: var(--text);
+    stroke: var(--surface);
+    stroke-width: 4;
+    stroke-linejoin: round;
+    paint-order: stroke;
+  }
+
+  @media (max-width: 40rem) {
+    svg {
+      aspect-ratio: 1 / 1;
+    }
+
+    .airports text {
+      font-size: 19px;
+      stroke-width: 5;
+    }
+
+    .airports circle {
+      r: 6.5px;
+    }
+
+    .route {
+      stroke-width: 3.2;
+    }
+
+    .route.draw {
+      stroke-width: 4;
+    }
+  }
+</style>
