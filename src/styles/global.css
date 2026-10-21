@@ -1,0 +1,304 @@
+/* Schriften: selbst ausgeliefert, Latin-Subset, nur die benötigten Schnitte (Lizenz: public/fonts/OFL-*.txt). */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/figtree-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/figtree-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/figtree-latin-700-normal.woff2') format('woff2');
+}
+
+/* Design-Tokens, Werte aus der App (src/theme.ts im App-Repo). */
+:root {
+  color-scheme: light dark;
+
+  --bg: #fff9f3;
+  --surface: #ffffff;
+  --surface-alt: #f3ebe2;
+  --card-border: #e6dacc;
+  --border: #ece1d5;
+  --text: #1e2a36;
+  --text-muted: #5b6672;
+  --text-subtle: #7a848e;
+  --primary: #cc3b24;
+  --primary-soft: #fde7e2;
+  --on-primary: #ffffff;
+  --accent: #0f6b64;
+  --map-ocean: #cfe7f3;
+  --map-land: #fff9f3;
+  --map-land-visited: #fbd9cc;
+  --map-border: #e6d9cb;
+  --map-border-visited: #e3a995;
+  --map-route: #e0482f;
+  --logo: #f3371c;
+  --logo-ink: #1c2a37;
+  --stamp-edge: #dccdbc;
+
+  --shadow-card: 0 4px 14px rgba(30, 42, 54, 0.07);
+
+  --font-display: 'Bricolage Grotesque', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --page-width: 68rem;
+  --text-width: 38rem;
+  --gutter: clamp(var(--space-4), 5vw, var(--space-8));
+  --transition: 150ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161d24;
+    --surface: #1f2932;
+    --surface-alt: #28333d;
+    --card-border: #3e4b57;
+    --border: #2f3a45;
+    --text: #f5efe8;
+    --text-muted: #b6bec6;
+    --text-subtle: #7f8a95;
+    --primary: #ff7a5c;
+    --primary-soft: #3d2620;
+    --on-primary: #1a120f;
+    --accent: #4fc2b5;
+    --map-ocean: #14232e;
+    --map-land: #22303b;
+    --map-land-visited: #45312c;
+    --map-border: #14232e;
+    --map-border-visited: #14232e;
+    --map-route: #ff8a6e;
+    --logo: #f3371c;
+    --logo-ink: #f5efe8;
+    --stamp-edge: #3e4b57;
+
+    --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Grundlagen */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 var(--space-4);
+  text-wrap: balance;
+}
+
+h1 {
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2rem);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.1875rem;
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 var(--space-4);
+}
+
+strong {
+  font-weight: 700;
+}
+
+a {
+  color: var(--primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: text-decoration-color var(--transition), color var(--transition);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Hilfsklassen */
+.container {
+  width: 100%;
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.lead {
+  font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.3125rem);
+  color: var(--text-muted);
+  max-width: 34rem;
+}
+
+/* Kleine Versal-Labels wie in der App: Abschnittstitel und Ticketfelder. */
+.label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: filter var(--transition);
+}
+
+.button:hover {
+  filter: brightness(0.93);
+}
+
+.button-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.button-secondary {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+@media (prefers-color-scheme: dark) {
+  .button:hover {
+    filter: brightness(1.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
