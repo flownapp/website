@@ -1,0 +1,257 @@
+---
+import Base from '../layouts/Base.astro';
+import WorldMap from '../components/WorldMap.astro';
+import BoardingPass from '../components/BoardingPass.astro';
+import { site } from '../config';
+import { airports, flights } from '../data/sample';
+import { haversineKm } from '../lib/geo';
+
+const km = (a: (typeof airports)[keyof typeof airports], b: (typeof airports)[keyof typeof airports]) =>
+  haversineKm(a.lat, a.lon, b.lat, b.lon);
+const number = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+
+const totalKm = flights.reduce((sum, f) => sum + km(airports[f.from], airports[f.to]), 0);
+const countryCount = new Set(flights.flatMap((f) => [airports[f.from].country, airports[f.to].country])).size;
+const airportCount = new Set(flights.flatMap((f) => [f.from, f.to])).size;
+const stats = [
+  { label: 'Flüge', value: number.format(flights.length) },
+  { label: 'Länder', value: number.format(countryCount) },
+  { label: 'Flughäfen', value: number.format(airportCount) },
+  { label: 'Kilometer', value: number.format(totalKm) },
+];
+
+const fra = airports.FRA;
+const jfk = airports.JFK;
+---
+
+<Base>
+  <section class="hero container" aria-labelledby="hero-title">
+    <h1 id="hero-title">Jeder Flug,<br /> den du genommen hast.</h1>
+    <p class="lead">
+      {site.name} ist ein Logbuch für deine Flugreisen. Du trägst ein, wohin du geflogen bist, und die App zeichnet
+      daraus deine Weltkarte und rechnet nach, wie weit du schon gekommen bist.
+    </p>
+    <p class="availability">
+      <span class="chip">Bald im App Store</span>
+      <span class="availability-note">Sobald die App erscheint, findest du den Link hier.</span>
+    </p>
+  </section>
+
+  <section class="container map-section" aria-label="Beispielkarte">
+    <WorldMap label="Weltkarte mit sechs Beispielflügen ab Berlin und Frankfurt nach Lissabon, Athen, Reykjavík, New York, Doha und Bangkok">
+      <figcaption>
+        <dl class="stats">
+          {
+            stats.map((s) => (
+              <div>
+                <dt class="label">{s.label}</dt>
+                <dd>{s.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="caption">Ein Beispiel: ein paar Reisen, wie sie in der App auf der Karte erscheinen.</p>
+      </figcaption>
+    </WorldMap>
+  </section>
+
+  <section class="container features" aria-labelledby="features-title">
+    <h2 id="features-title" class="visually-hidden">Was {site.name} kann</h2>
+    <div class="feature-text">
+      <div class="feature">
+        <h3>Deine Reisen als Liste</h3>
+        <p>
+          Eine Reise besteht aus einem oder mehreren Flügen, hin und zurück oder mit Zwischenstopp. Flughäfen findest
+          du in einer Datenbank mit rund 7.900 Einträgen, die auch ohne Netz funktioniert. Distanz und Flugzeit rechnet{' '}
+          {site.name} selbst aus, Zeitzonen inklusive.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Deine Routen auf der Weltkarte</h3>
+        <p>
+          Jeder Flug erscheint als Bogen auf dem kürzesten Weg über die Erde. Länder, in denen du warst, färben sich ein –
+          auch solche, die du über Land erreicht hast.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Deine Flüge in Zahlen</h3>
+        <p>
+          Kilometer, Stunden in der Luft, Länder und Kontinente, dein längster Flug und deine häufigste Strecke. Für
+          besondere Momente gibt es Poststempel: einmal um die Welt, über den Äquator, bis zum Mond.
+        </p>
+      </div>
+    </div>
+    <div class="feature-pass">
+      <BoardingPass
+        from={{ code: fra.iata, city: fra.city }}
+        to={{ code: jfk.iata, city: jfk.city }}
+        date="Sa., 14. Juni"
+        note="8 h 50 min"
+        fields={[
+          { label: 'Abflug', value: '10:05' },
+          { label: 'Ankunft', value: '12:55' },
+          { label: 'Distanz', value: `${number.format(km(fra, jfk))} km` },
+        ]}
+      />
+      <p class="caption">So sieht ein Flug in der Reise-Ansicht aus.</p>
+    </div>
+  </section>
+
+  <section class="container privacy" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">Deine Reisen bleiben bei dir.</h2>
+    <p>
+      {site.name} braucht kein Konto und keine Anmeldung. Alles, was du einträgst, wird auf deinem Gerät gespeichert. Karte
+      und Flughafendaten sind in der App enthalten, sie funktioniert also auch im Flugmodus.
+    </p>
+    <p><a href="/datenschutz">Mehr dazu in der Datenschutzerklärung</a></p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-12) var(--space-8);
+  }
+
+  .hero h1 {
+    max-width: 18ch;
+  }
+
+  .availability {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .chip {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .availability-note {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .map-section {
+    margin-block: var(--space-8) var(--space-24);
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-8);
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--card-border);
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-8);
+    margin: 0;
+  }
+
+  .stats dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caption {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-subtle);
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: var(--space-16);
+    align-items: start;
+  }
+
+  .feature-text {
+    max-width: var(--text-width);
+  }
+
+  .feature + .feature {
+    margin-top: var(--space-12);
+  }
+
+  .feature p {
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .feature-pass {
+    position: sticky;
+    top: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .feature-pass .caption {
+    padding-inline: var(--space-2);
+  }
+
+  .privacy {
+    margin-top: var(--space-24);
+  }
+
+  .privacy p {
+    max-width: var(--text-width);
+    color: var(--text-muted);
+  }
+
+  .privacy p:last-child {
+    color: inherit;
+  }
+
+  @media (max-width: 52rem) {
+    .features {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+
+    .feature-pass {
+      position: static;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .hero {
+      padding-top: var(--space-8);
+    }
+
+    .map-section {
+      margin-bottom: var(--space-16);
+    }
+
+    figcaption {
+      padding: var(--space-4);
+    }
+
+    .stats {
+      gap: var(--space-3) var(--space-6);
+    }
+
+    .stats dd {
+      font-size: 1.25rem;
+    }
+
+    .privacy {
+      margin-top: var(--space-16);
+    }
+  }
+</style>
