@@ -1,0 +1,179 @@
+---
+import '../styles/global.css';
+import { site } from '../config';
+
+interface Props {
+  /** Seitentitel ohne App-Namen; leer lassen für die Startseite. */
+  title?: string;
+  description?: string;
+  /** Für die 404-Seite: nicht indexieren, keine kanonische URL. */
+  noindex?: boolean;
+}
+
+const { title, description = site.description, noindex = false } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} – ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname.replace(/\.html$/, ''), site.url).href;
+const ogImage = new URL('/og.png', site.url).href;
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#FFF9F3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161D24" media="(prefers-color-scheme: dark)" />
+
+    <link rel="preload" href="/fonts/bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={site.locale} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`Logo von ${site.name}: drei korallrote Wellen`} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+    <header class="site-header container">
+      <a class="brand" href="/" aria-label={`${site.name} – Startseite`}>
+        <picture>
+          <source srcset="/logo/flown-logo-wordmark-on-dark.svg" media="(prefers-color-scheme: dark)" />
+          <img src="/logo/flown-logo-wordmark.svg" alt={site.name} width="415" height="90" />
+        </picture>
+      </a>
+      <nav aria-label="Hauptnavigation">
+        <a href="/support" aria-current={path === '/support' ? 'page' : undefined}>Support</a>
+      </nav>
+    </header>
+
+    <main id="inhalt">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-brand">
+          <img src="/logo/flown-logo.svg" alt="" width="20" height="20" />
+          <span>{site.name} · {site.tagline}</span>
+        </p>
+        <nav aria-label="Rechtliches und Hilfe">
+          <ul>
+            <li><a href="/support" aria-current={path === '/support' ? 'page' : undefined}>Support</a></li>
+            <li><a href="/datenschutz" aria-current={path === '/datenschutz' ? 'page' : undefined}>Datenschutz</a></li>
+            <li><a href="/impressum" aria-current={path === '/impressum' ? 'page' : undefined}>Impressum</a></li>
+          </ul>
+        </nav>
+        <p class="footer-note">© {year}</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+  }
+
+  .brand {
+    display: block;
+    border-radius: var(--radius-sm);
+  }
+
+  .brand img {
+    width: auto;
+    height: 28px;
+  }
+
+  .site-header nav a {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text);
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .site-header nav a:hover,
+  .site-header nav a[aria-current='page'] {
+    color: var(--primary);
+  }
+
+  .site-footer {
+    margin-top: var(--space-24);
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-8);
+    padding-block: var(--space-8);
+  }
+
+  .footer-inner p {
+    margin: 0;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .footer-inner ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-inner nav {
+    margin-inline-start: auto;
+  }
+
+  .footer-inner nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .footer-inner nav a:hover,
+  .footer-inner nav a[aria-current='page'] {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
+  .footer-note {
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 40rem) {
+    .footer-inner nav {
+      margin-inline-start: 0;
+      flex-basis: 100%;
+    }
+  }
+</style>
